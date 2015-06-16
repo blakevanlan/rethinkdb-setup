@@ -73,7 +73,7 @@ var load = function (connection, tables, callback) {
 }  
 
 var addSecondaryIndexes_ = function (conn, tableName, indexes, callback) {
-   insist.args(arguments, Object, String, insist.arrayOf(String), Function)
+   insist.args(arguments, Object, String, insist.arrayOf([String, Object]), Function)
    Async.each(indexes, function (index, done) {
       if (typeof index === "string" || (!index.indexFunction && !index.options)) {
          key = (typeof index === "string") ? index : index.name

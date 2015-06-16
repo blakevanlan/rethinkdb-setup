@@ -58,6 +58,21 @@ describe "RethinkdbSetup", ->
                   expect(indexes).to.contain("field0")
                   done()
 
+      it "should create a table with complex secondary index", (done) ->
+         config = {
+            tables: {
+               table0: ["id", {name: "field0", options: {multi: true}}]
+            }
+         }
+         RethinkdbSetup.setup @connection, config, (err) =>
+            return done(err) if err
+            r.tableList().run @connection, (err, tables) =>
+               return done(err) if err
+               expect(tables).to.contain("table0")
+               r.table("table0").indexList().run @connection, (err, indexes) ->
+                  expect(indexes).to.contain("field0")
+                  done()
+
    describe "empty", ->
 
       beforeEach (done) ->
