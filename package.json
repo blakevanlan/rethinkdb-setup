@@ -1,0 +1,47 @@
+{
+  "name": "rethinkdb-setup",
+  "version": "0.0.1",
+  "description": "Quickly sets up RethinkDB for testing",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha -t 5000 --recursive --compilers coffee:coffee-script/register",
+    "test-coverage": "mocha --recursive --compilers coffee:coffee-script/register --require blanket -R html-cov > coverage.html; /usr/bin/open -a \"/Applications/Google Chrome.app\" coverage.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/blakevanlan/rethinkdb-setup.git"
+  },
+  "keywords": [
+    "rethinkdb",
+    "setup",
+    "testing",
+    "mocha"
+  ],
+  "author": "Blake VanLandingham",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/blakevanlan/rethinkdb-setup/issues"
+  },
+  "homepage": "https://github.com/blakevanlan/rethinkdb-setup#readme",
+  "devDependencies": {
+    "blanket": "^1.1.7",
+    "chai": "^3.0.0",
+    "coffee-script": "^1.9.3",
+    "mocha": "^2.2.5"
+  },
+  "dependencies": {
+    "async": "^1.2.1",
+    "insist-types": "^1.0.9",
+    "rethinkdb": "^2.0.0"
+  },
+  "config": {
+    "blanket": {
+      "pattern": "index",
+      "data-cover-never": [
+        "node_modules",
+        "test"
+      ],
+      "loader": "./node-loaders/coffee-script"
+    }
+  }
+}
