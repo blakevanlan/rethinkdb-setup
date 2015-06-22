@@ -44,7 +44,7 @@ var setup = function (connection, config, callback) {
             if (!(value instanceof Array)) {
                throw Error("value for tables must be a string or an array");
             }
-            key = value.shift()
+            var key = value.shift();
             r.tableCreate(tableName, {primaryKey: key}).run(connection, function (err) {
                if (err) return done(err);
                addSecondaryIndexes_(connection, tableName, value, done);
@@ -76,14 +76,16 @@ var addSecondaryIndexes_ = function (conn, tableName, indexes, callback) {
    insist.args(arguments, Object, String, insist.arrayOf([String, Object]), Function)
    Async.each(indexes, function (index, done) {
       if (typeof index === "string" || (!index.indexFunction && !index.options)) {
-         key = (typeof index === "string") ? index : index.name
+         var key = (typeof index === "string") ? index : index.name
          return r.table(tableName).indexCreate(key).run(conn, done);
       }
+      var options = index.options || {};
       if (index.indexFunction) {
-         return r.table(tableName).indexCreate(index.name, index.indexFunction).run(conn, done);
+         r.table(tableName).indexCreate(index.name, index.indexFunction, options).run(conn, done);   
+      } else {
+         r.table(tableName).indexCreate(index.name, options).run(conn, done);
       }
-      // Must be index.options.
-      r.table(tableName).indexCreate(index.name, index.options).run(conn, done);
+      
    }, callback);
 };
 
