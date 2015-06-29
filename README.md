@@ -25,7 +25,18 @@ var config = {
       // seconardy index on email.
       table3: ["primaryKey", "email"],
       // Creates 'table4' with normal primary key and adds a geo index to 'location'.
-      table4: ["id", {name: "location", indexFunction: null, options: {geo: true}}]
+      table4: ["id", {name: "location", indexFunction: null, options: {geo: true}}],
+      // Creates 'table5' with normal primary key and adds an index with an arbitrary
+      // ReQL expression.
+      table5: [
+         "id", 
+         {
+            name: "location",
+            indexFunction: function(user) {
+               return r.add(user("last_name"), "_", user("first_name"));
+            })
+         }
+      ]
    }
 };
 
@@ -49,7 +60,7 @@ RethinkdbSetup.empty(connection, config, function (err) {
 You can also insert data into tables.
 ```javascript
 data = {
-   table0: {id: '123', foo: 'bar'}
+   table0: [{id: '123', foo: 'bar'}, {id: '456', foo: 'apples'}]
 };
 RethinkdbSetup.load(rethinkdbConnection, data, function (err) {
    //...   

@@ -85,7 +85,6 @@ var addSecondaryIndexes_ = function (conn, tableName, indexes, callback) {
       } else {
          r.table(tableName).indexCreate(index.name, options).run(conn, done);
       }
-      
    }, callback);
 };
 
