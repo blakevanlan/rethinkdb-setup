@@ -77,13 +77,19 @@ var addSecondaryIndexes_ = function (conn, tableName, indexes, callback) {
    Async.each(indexes, function (index, done) {
       if (typeof index === "string" || (!index.indexFunction && !index.options)) {
          var key = (typeof index === "string") ? index : index.name
-         return r.table(tableName).indexCreate(key).run(conn, done);
+         return r.table(tableName).indexCreate(key).run(conn,function(){
+           r.table(tableName).indexWait(key).run(conn,done);
+         });
       }
       var options = index.options || {};
       if (index.indexFunction) {
-         r.table(tableName).indexCreate(index.name, index.indexFunction, options).run(conn, done);   
+         r.table(tableName).indexCreate(index.name, index.indexFunction, options).run(conn, function(){
+            r.table(tableName).indexWait(index.name).run(conn, done);
+         });
       } else {
-         r.table(tableName).indexCreate(index.name, options).run(conn, done);
+         r.table(tableName).indexCreate(index.name, options).run(conn, function(){
+            r.table(tableName).indexWait(index.name).run(conn, done);
+         });
       }
    }, callback);
 };
