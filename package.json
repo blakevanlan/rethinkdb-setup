@@ -4,7 +4,7 @@
   "description": "Quickly sets up RethinkDB for testing",
   "main": "index.js",
   "scripts": {
-    "test": "mocha -t 5000 --recursive --compilers coffee:coffee-script/register",
+    "test": "mocha -t 12000 --recursive --compilers coffee:coffee-script/register",
     "test-coverage": "mocha --recursive --compilers coffee:coffee-script/register --require blanket -R html-cov > coverage.html; /usr/bin/open -a \"/Applications/Google Chrome.app\" coverage.html"
   },
   "repository": {
