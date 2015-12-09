@@ -18,10 +18,29 @@ var Async = require('async');
 
 var connectAndSetup = function (config, callback) {
    r.connect({db: config.db || 'test'}, function (err, connection) {
-      setup(connection, config, function (err) {
-         if (err) return callback(err);
-         callback(null, connection);
-      });
+      if (err) return callback(err);
+      var runSetup = function () {
+         setup(connection, config, function (err) {
+            if (err) return callback(err);
+            callback(null, connection);
+         });
+      };
+
+      if (connection.db != 'test') {
+         r.dbList().run(connection, function (err, list) {
+            if (err) return callback(err);
+            if (list.indexOf(connection.db) == -1) {
+               r.dbCreate(connection.db).run(connection, function (err, data) {
+                  if (err) return callback(err);
+                  runSetup();
+               });
+            } else {
+               runSetup();
+            }
+         });
+      } else {
+         runSetup();
+      }
    });
 };
 

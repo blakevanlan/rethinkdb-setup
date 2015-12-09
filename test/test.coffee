@@ -8,16 +8,49 @@ describe "RethinkdbSetup", ->
 
    before (done) ->
       @connection = 
-      r.connect {db: "test"}, (err, connection) =>
-         return done(err) if err
-         @connection = connection
-         done()
+         r.connect {db: "test"}, (err, connection) =>
+            return done(err) if err
+            @connection = connection
+            done()
 
    afterEach (done) ->
       Async.each ["table0", "table1"], (tableName, callback) =>
          # Ignore any errors.
          r.tableDrop(tableName).run @connection, -> callback()
       , done
+
+   describe "connectAndSetup", ->
+
+      afterEach (done) ->
+         r.dbList().run @connection, (err, list) =>
+            if (list.indexOf("test2") != -1)
+               r.dbDrop("test2").run @connection, (err) ->
+                  done()
+            else
+               done()
+
+      it "should create a connection", (done) ->
+         config = {
+            tables: {table0: true}
+         }
+         RethinkdbSetup.connectAndSetup config, (err, connection) ->
+            return done(err) if err
+            expect(connection).to.exist
+            done()
+
+      it "should create database if it doesn't exist", (done) ->
+         config = {
+            db: "test2"
+            tables: {table0: true}
+         }
+         RethinkdbSetup.connectAndSetup config, (err, connection) ->
+            return done(err) if err
+            expect(connection).to.exist
+            expect(connection.db).to.equal("test2")
+            r.dbList().run connection, (err, list) ->
+               return done(err) if err
+               expect(list).to.contain("test2")
+               done()
 
    describe "setup", ->
       
@@ -149,5 +182,3 @@ describe "RethinkdbSetup", ->
                expect(data.id).to.equal("123")
                expect(data.foo).to.equal("bar")
                done()
-
-
