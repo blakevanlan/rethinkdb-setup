@@ -1,6 +1,8 @@
 # RethinkDB Setup
 Quickly sets up RethinkDB for testing.
 
+[ ![Codeship Status for blakevanlan/rethinkdb-setup](https://codeship.com/projects/2f082350-e083-0133-44ac-7629dd68ac29/status?branch=master)](https://codeship.com/projects/145194)
+
 ## Install
 ```
 npm install rethinkdb-setup
