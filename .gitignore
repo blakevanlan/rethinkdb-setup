@@ -27,3 +27,5 @@ build/Release
 node_modules
 
 coverage.html
+
+rethinkdb_data/
