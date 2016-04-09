@@ -1,6 +1,6 @@
 {
   "name": "rethinkdb-setup",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Quickly sets up RethinkDB for testing",
   "main": "index.js",
   "scripts": {
