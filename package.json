@@ -32,7 +32,7 @@
   "dependencies": {
     "async": "^1.2.1",
     "insist-types": "^1.0.9",
-    "rethinkdb": "^2.2.0"
+    "rethinkdb": "^2.3.0"
   },
   "config": {
     "blanket": {
