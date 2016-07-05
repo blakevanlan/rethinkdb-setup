@@ -16,6 +16,7 @@ var RethinkdbSetup = require('rethinkdb-setup')
 
 var config = {
    db: "test" // sets the default db
+   host: "localhost" // sets the host
    tables: {
       // Creates 'table0' with normal primary key.
       table0: true, 
