@@ -5,7 +5,8 @@ var Async = require('async');
 /**
  * Example config:
  * {
- *   db: "test"
+ *   db: "test",
+ *   host: "localhost",
  *   tables: {
  *      table0: true,
  *      table1: "id",
@@ -17,7 +18,7 @@ var Async = require('async');
  */
 
 var connectAndSetup = function (config, callback) {
-   r.connect({db: config.db || 'test'}, function (err, connection) {
+   r.connect({db: config.db || 'test', host: config.host || null}, function (err, connection) {
       if (err) return callback(err);
       var runSetup = function () {
          setup(connection, config, function (err) {
