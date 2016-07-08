@@ -43,6 +43,9 @@ var config = {
    }
 };
 
+// NOTE: The rethinkdb module checks the validity of the connection using
+// a instanceof meaning that the module can throw an error if two different
+// versions are being used with the same connection.
 RethinkdbSetup.connectAndSetup(config, function (err, connection) {
    //...
 });

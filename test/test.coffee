@@ -54,6 +54,17 @@ describe "RethinkdbSetup", ->
 
    describe "setup", ->
       
+      it "should create database if it doesn't exist", (done) ->
+         r.connect {db: "test2"}, (err, connection) =>
+            return done(err) if err
+            RethinkdbSetup.setup connection, {tables: {table0: true}}, (err) =>
+               return done(err) if err
+               expect(connection.db).to.equal("test2")
+               r.dbList().run connection, (err, list) ->
+                  return done(err) if err
+                  expect(list).to.contain("test2")
+                  done()
+
       it "should create each table when it doesn't exist", (done) ->
          RethinkdbSetup.setup @connection, {tables: {table0: true, table1: true}}, (err) =>
             return done(err) if err

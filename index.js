@@ -18,61 +18,48 @@ var Async = require('async');
  */
 
 var connectAndSetup = function (config, callback) {
+   insist.args(arguments, Object, Function)
    r.connect({db: config.db || 'test', host: config.host || null}, function (err, connection) {
       if (err) return callback(err);
-      var runSetup = function () {
+      createDatabaseIfNeeded_(connection, function (err) {
          setup(connection, config, function (err) {
             if (err) return callback(err);
             callback(null, connection);
          });
-      };
-
-      if (connection.db != 'test') {
-         r.dbList().run(connection, function (err, list) {
-            if (err) return callback(err);
-            if (list.indexOf(connection.db) == -1) {
-               r.dbCreate(connection.db).run(connection, function (err, data) {
-                  if (err) return callback(err);
-                  runSetup();
-               });
-            } else {
-               runSetup();
-            }
-         });
-      } else {
-         runSetup();
-      }
+      });
    });
 };
 
 var setup = function (connection, config, callback) {
    insist.args(arguments, Object, Object, Function)
    if (!config.tables) throw Error('Config object requires \'tables\' property'); 
-
-   r.tableList().run(connection, function (err, tables) {
+   createDatabaseIfNeeded_(connection, function (err) {
       if (err) return callback(err);
-      Async.forEachOf(config.tables, function (value, tableName, done) {
-         // Only do anything if the table doesn't exist.
-         if (tables.indexOf(tableName) === -1 && value) {
-            if (value === true || value === "id") {
-               return r.tableCreate(tableName).run(connection, done);
+      r.tableList().run(connection, function (err, tables) {
+         if (err) return callback(err);
+         Async.forEachOf(config.tables, function (value, tableName, done) {
+            // Only do anything if the table doesn't exist.
+            if (tables.indexOf(tableName) === -1 && value) {
+               if (value === true || value === "id") {
+                  return r.tableCreate(tableName).run(connection, done);
+               }
+               if (typeof value === "string") {
+                  return r.tableCreate(tableName, {primaryKey: value}).run(connection, done);
+               }
+               // Must be an array of strings at this point.
+               if (!(value instanceof Array)) {
+                  throw Error("value for tables must be a string or an array");
+               }
+               var key = value.shift();
+               r.tableCreate(tableName, {primaryKey: key}).run(connection, function (err) {
+                  if (err) return done(err);
+                  addSecondaryIndexes_(connection, tableName, value, done);
+               });
+            } else {
+               done();
             }
-            if (typeof value === "string") {
-               return r.tableCreate(tableName, {primaryKey: value}).run(connection, done);
-            }
-            // Must be an array of strings at this point.
-            if (!(value instanceof Array)) {
-               throw Error("value for tables must be a string or an array");
-            }
-            var key = value.shift();
-            r.tableCreate(tableName, {primaryKey: key}).run(connection, function (err) {
-               if (err) return done(err);
-               addSecondaryIndexes_(connection, tableName, value, done);
-            });
-         } else {
-            done();
-         }
-      }, callback);   
+         }, callback);   
+      });
    });
 };
 
@@ -113,6 +100,19 @@ var addSecondaryIndexes_ = function (conn, tableName, indexes, callback) {
       }
    }, callback);
 };
+
+var createDatabaseIfNeeded_ = function (connection, callback) {
+   r.dbList().run(connection, function (err, list) {
+      if (err) return callback(err);
+      if (list.indexOf(connection.db) === -1) {
+         r.dbCreate(connection.db).run(connection, function (err, data) {
+            callback(err);
+         });
+      } else {
+         callback();
+      }
+   });
+}
 
 module.exports = {
    connectAndSetup: connectAndSetup,
