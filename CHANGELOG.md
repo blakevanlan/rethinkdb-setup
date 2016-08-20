@@ -1,7 +1,7 @@
 # Changes By Release
 
 ## 0.2.3
-* Updates `rethinkdb`: `2.3.1` -> `2.3.2`
+* Fix bug where db was not being created when using #setup.
 
 ## 0.2.2
 * Updates `rethinkdb`: `2.3.1` -> `2.3.2`
