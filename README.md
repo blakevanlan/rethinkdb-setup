@@ -15,8 +15,11 @@ Connect to a RethinkDB and set up tables.
 var RethinkdbSetup = require('rethinkdb-setup')
 
 var config = {
-   db: "test" // sets the default db
-   host: "localhost" // sets the host
+   connection: {
+      // Connection config, passed straight to r.connect.
+      db: "test" // sets the default db
+      host: "localhost" // sets the host
+   },
    tables: {
       // Creates 'table0' with normal primary key.
       table0: true, 

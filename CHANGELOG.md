@@ -1,5 +1,8 @@
 # Changes By Release
 
+## 0.3.0
+* Changes to use a `connection` object that's passed directly to r.connect instead of having `db` and `host` as top-level keys. Copies over `db` and `host` to remain backwards compatible.
+
 ## 0.2.3
 * Fix bug where db was not being created when using #setup.
 

@@ -5,8 +5,10 @@ var Async = require('async');
 /**
  * Example config:
  * {
- *   db: "test",
- *   host: "localhost",
+ *   connection: {
+ *      db: "test",
+ *      host: "localhost"
+ *   },
  *   tables: {
  *      table0: true,
  *      table1: "id",
@@ -19,7 +21,19 @@ var Async = require('async');
 
 var connectAndSetup = function (config, callback) {
    insist.args(arguments, Object, Function)
-   r.connect({db: config.db || 'test', host: config.host || null}, function (err, connection) {
+   if (!config.connection) {
+      config.connection = {};
+      if (config.host) {
+         config.connection.host = config.host;  
+      }
+      if (config.db) {
+         config.connection.db = config.db;
+      }
+   }
+   if (!config.connection.db) {
+      config.connection.db = 'test';
+   }
+   r.connect(config.connection, function (err, connection) {
       if (err) return callback(err);
       createDatabaseIfNeeded_(connection, function (err) {
          setup(connection, config, function (err) {

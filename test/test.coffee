@@ -52,6 +52,22 @@ describe "RethinkdbSetup", ->
                expect(list).to.contain("test2")
                done()
 
+      it "should use the connection option if supplied", (done) ->
+         config = {
+            connection: {
+               db: "test2"
+            }
+            tables: {table0: true}
+         }
+         RethinkdbSetup.connectAndSetup config, (err, connection) ->
+            return done(err) if err
+            expect(connection).to.exist
+            expect(connection.db).to.equal("test2")
+            r.dbList().run connection, (err, list) ->
+               return done(err) if err
+               expect(list).to.contain("test2")
+               done()
+
    describe "setup", ->
       
       it "should create database if it doesn't exist", (done) ->
