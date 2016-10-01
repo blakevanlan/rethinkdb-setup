@@ -178,6 +178,32 @@ describe "RethinkdbSetup", ->
                   expect(indexes).to.contain("field0")
                   done()
 
+      it "should add secondary indexes to an existing table", (done) ->
+         config1 = {
+            tables: {
+               table0: ["id", "field0"]
+            }
+         }
+         config2 = {
+            tables: {
+               table0: ["id", "field0", "field1"]
+            }
+         }
+         RethinkdbSetup.setup @connection, config1, (err) =>
+            return done(err) if err
+            r.tableList().run @connection, (err, tables) =>
+               return done(err) if err
+               expect(tables).to.contain("table0")
+               r.table("table0").indexList().run @connection, (err, indexes) =>
+                  return done(err) if err
+                  expect(indexes).to.contain("field0")
+                  expect(indexes).to.not.contain("field1")
+                  RethinkdbSetup.setup @connection, config2, (err) =>
+                     return done(err) if err
+                     r.table("table0").indexList().run @connection, (err, indexes) =>
+                        return done(err) if err
+                        expect(indexes).to.contain("field1")
+                        done()
 
    describe "empty", ->
 

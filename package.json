@@ -24,14 +24,14 @@
   },
   "homepage": "https://github.com/blakevanlan/rethinkdb-setup#readme",
   "devDependencies": {
-    "blanket": "^1.1.7",
-    "chai": "^3.0.0",
-    "coffee-script": "^1.9.3",
-    "mocha": "^2.2.5"
+    "blanket": "1.1.7",
+    "chai": "3.0.0",
+    "coffee-script": "1.9.3",
+    "mocha": "2.2.5"
   },
   "dependencies": {
-    "async": "^1.2.1",
-    "insist-types": "^1.0.9",
+    "async": "1.2.1",
+    "insist-types": "1.0.9",
     "rethinkdb": "2.3.2"
   },
   "config": {

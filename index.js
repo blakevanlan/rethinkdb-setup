@@ -52,25 +52,19 @@ var setup = function (connection, config, callback) {
       r.tableList().run(connection, function (err, tables) {
          if (err) return callback(err);
          Async.forEachOf(config.tables, function (value, tableName, done) {
-            // Only do anything if the table doesn't exist.
-            if (tables.indexOf(tableName) === -1 && value) {
-               if (value === true || value === "id") {
-                  return r.tableCreate(tableName).run(connection, done);
-               }
-               if (typeof value === "string") {
-                  return r.tableCreate(tableName, {primaryKey: value}).run(connection, done);
-               }
-               // Must be an array of strings at this point.
-               if (!(value instanceof Array)) {
-                  throw Error("value for tables must be a string or an array");
-               }
-               var key = value.shift();
-               r.tableCreate(tableName, {primaryKey: key}).run(connection, function (err) {
+            if (!value) {
+               return done()
+            }
+            var primaryKey = getPrimaryKeyFromConfig_(value);
+            var secondaryIndexes = getSecondaryIndexesFromConfig_(value);
+            if (tables.indexOf(tableName) === -1) {
+               // Create the table if it does not exist.
+               r.tableCreate(tableName, {primaryKey: primaryKey}).run(connection, function (err) {
                   if (err) return done(err);
-                  addSecondaryIndexes_(connection, tableName, value, done);
+                  addSecondaryIndexes_(connection, tableName, secondaryIndexes, done);
                });
             } else {
-               done();
+               addSecondaryIndexes_(connection, tableName, secondaryIndexes, done);
             }
          }, callback);   
       });
@@ -95,27 +89,37 @@ var load = function (connection, tables, callback) {
 
 var addSecondaryIndexes_ = function (conn, tableName, indexes, callback) {
    insist.args(arguments, Object, String, insist.arrayOf([String, Object]), Function)
-   Async.each(indexes, function (index, done) {
-      if (typeof index === "string" || (!index.indexFunction && !index.options)) {
-         var key = (typeof index === "string") ? index : index.name
-         return r.table(tableName).indexCreate(key).run(conn,function(){
-           r.table(tableName).indexWait(key).run(conn,done);
-         });
-      }
-      var options = index.options || {};
-      if (index.indexFunction) {
-         r.table(tableName).indexCreate(index.name, index.indexFunction, options).run(conn, function(){
-            r.table(tableName).indexWait(index.name).run(conn, done);
-         });
-      } else {
-         r.table(tableName).indexCreate(index.name, options).run(conn, function(){
-            r.table(tableName).indexWait(index.name).run(conn, done);
-         });
-      }
-   }, callback);
+   r.table(tableName).indexList().run(conn, function (err, currentIndexes) {
+      if (err) return callback(err);
+      Async.each(indexes, function (index, done) {
+         var key = getSecondaryIndexKeyFromConfig_(index);
+         if (currentIndexes.indexOf(key) === -1) {
+            addSecondaryIndex_(conn, tableName, index, done);
+         } else {
+            done();
+         }
+      }, callback);
+   });
+};
+
+var addSecondaryIndex_ = function (conn, tableName, index, callback) {
+   insist.args(arguments, Object, String, [String, Object], Function)
+   var key = getSecondaryIndexKeyFromConfig_(index);
+   var createIndexQuery = null;
+   var options = index.options || {};
+
+   if (index.indexFunction) {
+      createIndexQuery = r.table(tableName).indexCreate(key, index.indexFunction, options);
+   } else {
+      createIndexQuery = r.table(tableName).indexCreate(key, options);
+   }
+   createIndexQuery.run(conn, function () {
+      r.table(tableName).indexWait(key).run(conn, callback);
+   });
 };
 
 var createDatabaseIfNeeded_ = function (connection, callback) {
+   insist.args(arguments, Object, Function)
    r.dbList().run(connection, function (err, list) {
       if (err) return callback(err);
       if (list.indexOf(connection.db) === -1) {
@@ -126,6 +130,40 @@ var createDatabaseIfNeeded_ = function (connection, callback) {
          callback();
       }
    });
+};
+
+var getPrimaryKeyFromConfig_ = function (tableConfig) {
+   insist.args(arguments, [Boolean, String, Array])
+   if (tableConfig === true || tableConfig === false) {
+      return "id";
+   }
+   if (typeof tableConfig === "string") {
+      return tableConfig;
+   }
+   // Must be an array of strings at this point.
+   if (!(tableConfig instanceof Array)) {
+      throw Error("value for tables must be a string or an array");
+   }
+   return tableConfig[0];
+};
+
+var getSecondaryIndexesFromConfig_ = function (tableConfig) {
+   insist.args(arguments, [Boolean, String, Array])
+   if (!(tableConfig instanceof Array)) {
+      return [];
+   }
+   return tableConfig.splice(1); 
+}
+
+var getSecondaryIndexKeyFromConfig_ = function (indexConfig) {
+   insist.args(arguments, [String, Object])
+   if (typeof indexConfig === "string") {
+      return indexConfig;
+   }
+   if (!indexConfig.name) {
+      throw Error ("secondary index config missing name property:" + JSON.stringify(indexConfig));
+   }
+   return indexConfig.name;
 }
 
 module.exports = {
