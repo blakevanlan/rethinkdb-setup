@@ -37,7 +37,7 @@ var config = {
       table5: [
          "id", 
          {
-            name: "location",
+            name: "fullname",
             indexFunction: function(user) {
                return r.add(user("last_name"), "_", user("first_name"));
             })
