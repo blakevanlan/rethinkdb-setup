@@ -30,7 +30,7 @@
     "mocha": "2.2.5"
   },
   "dependencies": {
-    "async": "1.2.1",
+    "async": "2.1.1",
     "insist-types": "1.0.9",
     "rethinkdb": "2.3.3"
   },
