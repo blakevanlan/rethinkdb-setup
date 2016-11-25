@@ -27,7 +27,7 @@
     "blanket": "1.1.7",
     "chai": "3.0.0",
     "coffee-script": "1.9.3",
-    "mocha": "2.2.5"
+    "mocha": "3.2.0"
   },
   "dependencies": {
     "async": "1.2.1",
